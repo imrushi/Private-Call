@@ -23,7 +23,7 @@ environment:
 dependencies:
   contacts_service: ^0.4.6
   font_awesome_flutter: ^8.8.1
-  random_color: ^1.0.5
+  permission_handler: ^5.0.0+hotfix.6
   flutter:
     sdk: flutter
 

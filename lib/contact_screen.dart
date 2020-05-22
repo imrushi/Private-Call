@@ -1,5 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:private_call/appBar.dart';
 // import 'package:simple_permissions/simple_permissions.dart';
 import 'cards_1.dart';
@@ -10,6 +12,12 @@ class ContactPage extends StatefulWidget {
 }
 
 class _ContactPageState extends State<ContactPage> {
+  permissionMethod() async {
+    if (await Permission.contacts.request().isGranted) {}
+    Map<Permission, PermissionStatus> statuses =
+        await [Permission.contacts].request();
+  }
+
   Color primaryColorButton = Color(0xFF4C4F5E);
   Icon changeIcon = Icon(Icons.add);
   String private_call = 'Private Call';
@@ -20,6 +28,7 @@ class _ContactPageState extends State<ContactPage> {
 
   @override
   void initState() {
+    permissionMethod();
     super.initState();
     getAllContacts();
     // getContactsPermission();
@@ -75,6 +84,10 @@ class _ContactPageState extends State<ContactPage> {
     });
   }
 
+  // waitContact() async {
+  //   return await getAllContacts();
+  // }
+
   getAllContacts() async {
     List<Contact> _contacts = (await ContactsService.getContacts()).toList();
     setState(() {
@@ -84,26 +97,25 @@ class _ContactPageState extends State<ContactPage> {
 
   @override
   Widget build(BuildContext context) {
+    // checkPermissions(context);
     bool isSearching = searchController.text.isNotEmpty;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: Column(
-        children: <Widget>[
-          AppbarCustom(
-            tMain: private_call,
-          ),
-          Expanded(
-            child: Container(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    searchBar(context),
-                    contactListView(isSearching),
-                  ]),
+      body: Column(children: <Widget>[
+        AppbarCustom(
+          tMain: private_call,
+        ),
+        Expanded(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                searchBar(context),
+                contactListView(isSearching),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 
@@ -116,11 +128,8 @@ class _ContactPageState extends State<ContactPage> {
         itemBuilder: (context, index) {
           Contact contact =
               isSearching == true ? contactsFiltered[index] : contacts[index];
-
           return ListTile(
             onTap: () {
-              // print(contact.isSelected);
-              // print(contact.phones.elementAt(0).value);
               setState(() {
                 (!contacts[index].isSelected)
                     ? contacts[index].isSelected = true
@@ -128,10 +137,14 @@ class _ContactPageState extends State<ContactPage> {
               });
               print(index);
               print(contacts[index].isSelected);
+              print(contact);
             },
-            selected: contacts[index].isSelected,
             title: Text(contact.displayName),
-            subtitle: CardType(ttText: contact.phones.elementAt(0).value),
+            selected: contacts[index].isSelected,
+            subtitle: CardType(
+                ttText: contact.phones.isNotEmpty
+                    ? contact.phones.elementAt(0).value
+                    : 'No Phone no.'),
             leading: (contact.avatar != null && contact.avatar.length > 0)
                 ? CircleAvatar(
                     backgroundImage: MemoryImage(contact.avatar),
