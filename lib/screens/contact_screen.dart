@@ -1,10 +1,10 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:private_call/appBar.dart';
+
+import 'package:private_call/components/appBar.dart';
 // import 'package:simple_permissions/simple_permissions.dart';
-import 'cards_1.dart';
+import 'package:private_call/components/cards_1.dart';
+import 'package:private_call/database/TaskModel.dart';
 
 class ContactPage extends StatefulWidget {
   @override
@@ -12,38 +12,33 @@ class ContactPage extends StatefulWidget {
 }
 
 class _ContactPageState extends State<ContactPage> {
-  permissionMethod() async {
-    if (await Permission.contacts.request().isGranted) {}
-    Map<Permission, PermissionStatus> statuses =
-        await [Permission.contacts].request();
-  }
-
+  final TodoHelper _todoHelper = TodoHelper();
   Color primaryColorButton = Color(0xFF4C4F5E);
   Icon changeIcon = Icon(Icons.add);
-  String private_call = 'Private Call';
+  String private_call = 'Select Contacts';
   // bool selected = false;
+  List<Contact> fcontact = [];
   List<Contact> contacts = [];
   List<Contact> contactsFiltered = [];
   TextEditingController searchController = new TextEditingController();
 
+  List<TaskModel> tasks = [];
+
+  TaskModel currentTask;
+
   @override
   void initState() {
-    permissionMethod();
-    super.initState();
     getAllContacts();
-    // getContactsPermission();
+    super.initState();
+
     searchController.addListener(() {
       filterContacts();
     });
   }
 
-  // getContactsPermission() async {
-  //   PermissionStatus permissionResult =
-  //       await SimplePermissions.requestPermission(Permission.ReadContacts);
-  //   if (permissionResult == PermissionStatus.authorized) {
-  //     // code of read or write file in external storage (SD card)
-  //   }
-  // }
+  List<TaskModel> retList() {
+    return tasks;
+  }
 
   String flattenPhoneNumber(String phoneStr) {
     return phoneStr.replaceAllMapped(RegExp(r'^(\+)|\D'), (Match m) {
@@ -84,15 +79,29 @@ class _ContactPageState extends State<ContactPage> {
     });
   }
 
-  // waitContact() async {
-  //   return await getAllContacts();
-  // }
-
   getAllContacts() async {
     List<Contact> _contacts = (await ContactsService.getContacts()).toList();
     setState(() {
       contacts = _contacts;
     });
+  }
+
+  // getAllSelected() async {
+  //   List<Contact> _fcontacts = (await ContactsService.getContacts()).toList();
+  //   setState(() {
+  //     fcontact = _fcontacts;
+  //   });
+  // }
+  afterSelecting() async {
+    for (int i = 0; i <= contacts.length - 1; i++) {
+      if (contacts[i].isSelected) {
+        currentTask = TaskModel(
+            name: contacts[i].displayName,
+            phoneno: contacts[i].phones.elementAt(0).value);
+        _todoHelper.insertTask(currentTask);
+        print(contacts[i].displayName);
+      }
+    }
   }
 
   @override
@@ -111,6 +120,20 @@ class _ContactPageState extends State<ContactPage> {
               children: <Widget>[
                 searchBar(context),
                 contactListView(isSearching),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RaisedButton(
+                        child: Text('After Selecting Click Here'),
+                        color: Color(0xFF4C4F5E),
+                        onPressed: () {
+                          setState(() {
+                            afterSelecting();
+                            print('Inserted');
+                          });
+                        }),
+                  ],
+                )
               ],
             ),
           ),
@@ -181,43 +204,3 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 }
-
-// Container(
-//         padding: EdgeInsets.all(20),
-//         child: Column(
-//           children: <Widget>[
-
-//           ],
-//         ),
-//       ),
-
-// Container(
-//         padding: EdgeInsets.all(20.0),
-//         child: Column(
-//           children: <Widget>[
-//             Container(
-//               height: 120.0,
-//               color: Theme.of(context).primaryColor,
-//               alignment: Alignment.center,
-//               padding: EdgeInsets.only(top: 25.0),
-//               child: Text(
-//                 'Private Call',
-//                 style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
-//               ),
-//             ),
-//             Expanded(
-//               child: Container(
-//                 decoration: BoxDecoration(
-//                   color: Theme.of(context).accentColor,
-//                   borderRadius: BorderRadius.only(
-//                     topLeft: Radius.circular(30.0),
-//                     topRight: Radius.circular(30.0),
-//                   ),
-//                 ),
-//                 child: searchBar(context),
-//               ),
-//             ),
-//             contactListView(isSearching),
-//           ],
-//         ),
-//       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:private_call/contact_screen.dart';
-import 'package:private_call/favorite_screen.dart';
-import 'package:private_call/security_screen.dart';
+import 'package:private_call/screens/contact_screen.dart';
+import 'package:private_call/screens/favorite_screen.dart';
+import 'package:private_call/screens/security_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,8 +31,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedTab = 0;
   final _pageOptions = [
-    ContactPage(),
     Favorite(),
+    ContactPage(),
     Security(),
   ];
   @override
@@ -49,12 +49,12 @@ class _MainPageState extends State<MainPage> {
         },
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_add),
-            title: Text('Home'),
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.star),
             title: Text('Favorite'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_add),
+            title: Text('Add'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.security),
